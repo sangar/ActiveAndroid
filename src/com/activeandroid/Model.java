@@ -62,12 +62,17 @@ public abstract class Model {
         this.mId = id;
     }
 
-	public final void delete() {
-		Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
+	public final boolean delete() {
+		int numRows = Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
+        if (numRows == 0) {
+            return false;
+        }
 		Cache.removeEntity(this);
 
 		Cache.getContext().getContentResolver()
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+
+        return true;
 	}
 
 	public boolean save() {
