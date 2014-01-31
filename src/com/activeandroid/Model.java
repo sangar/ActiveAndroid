@@ -62,10 +62,6 @@ public abstract class Model {
         this.mId = id;
     }
 
-    protected boolean valid() {
-        return true;
-    };
-
 	public final void delete() {
 		Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
 		Cache.removeEntity(this);
@@ -77,10 +73,16 @@ public abstract class Model {
 	public boolean save() {
         boolean modelSaved = false;
 
+        // Validation
+        beforeValidation();
         if (!valid()) {
             return modelSaved;
         }
+        afterValidation();
 
+        beforeSave();
+
+        // Saving
 		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = new ContentValues();
 
@@ -173,8 +175,7 @@ public abstract class Model {
             }
 		}
 
-		Cache.getContext().getContentResolver()
-				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+		afterSave();
 
         return modelSaved;
 	}
@@ -293,6 +294,20 @@ public abstract class Model {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PROTECTED METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
+
+    // Save/update related callbacks
+    protected boolean valid() {
+        return true;
+    };
+
+    protected void beforeValidation() {}
+    protected void afterValidation() {}
+
+    protected void beforeSave() {}
+    protected void afterSave() {
+        Cache.getContext().getContentResolver()
+                .notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+    }
 
 	protected final <T extends Model> List<T> getMany(Class<T> type, String foreignKey) {
 		return new Select().from(type).where(Cache.getTableName(type) + "." + foreignKey + "=?", getId()).execute();
