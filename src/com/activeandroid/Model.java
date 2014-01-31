@@ -62,6 +62,10 @@ public abstract class Model {
         this.mId = id;
     }
 
+    protected boolean valid() {
+        return true;
+    };
+
 	public final void delete() {
 		Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
 		Cache.removeEntity(this);
@@ -72,6 +76,10 @@ public abstract class Model {
 
 	public boolean save() {
         boolean modelSaved = false;
+
+        if (!valid()) {
+            return modelSaved;
+        }
 
 		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = new ContentValues();
