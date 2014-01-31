@@ -275,8 +275,6 @@ public abstract class Model {
         return true;
     }
 
-    ;
-
     protected void beforeValidation() {
     }
 
