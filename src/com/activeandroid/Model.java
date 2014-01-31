@@ -58,7 +58,9 @@ public abstract class Model {
 		return mId;
 	}
 
-    public final void setId(Long id) { this.mId = id; }
+    public final void setId(Long id) {
+        this.mId = id;
+    }
 
 	public final void delete() {
 		Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
@@ -68,7 +70,9 @@ public abstract class Model {
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
 	}
 
-	public Long save() {
+	public boolean save() {
+        boolean modelSaved = false;
+
 		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = new ContentValues();
 
@@ -150,14 +154,21 @@ public abstract class Model {
 
 		if (mId == null) {
 			mId = db.insert(mTableInfo.getTableName(), null, values);
+            if (mId != -1) {
+                modelSaved = true;
+            }
 		}
 		else {
-			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+            int numRows = db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+            if (numRows != -1) {
+                modelSaved = true;
+            }
 		}
 
 		Cache.getContext().getContentResolver()
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
-		return mId;
+
+        return modelSaved;
 	}
 
 	// Convenience methods
