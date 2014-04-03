@@ -62,7 +62,7 @@ public abstract class Model {
         this.mId = id;
     }
 
-    public final boolean delete() {
+    public boolean delete() {
         int numRows = Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[]{getId().toString()});
         if (numRows == 0) {
             return false;
